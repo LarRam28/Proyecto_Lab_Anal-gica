@@ -1,0 +1,54 @@
+\documentclass[class=article,border=10pt, margin=3mm]{standalone}
+\usepackage{verbatim}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usepackage[americanresistors,americaninductors,RPvoltages]{circuitikz}
+\usepackage{amsmath}
+
+
+\begin{document}
+
+\begin{circuitikz}[american, scale=1.2]
+    
+    % 1. Definición de Coordenadas del Puente (Ajusta el 1.5 para cambiar la altura)
+    \coordinate (T) at (3, 1.5);  % Nodo Superior
+    \coordinate (B) at (3, -1.5); % Nodo Inferior
+    \coordinate (L) at (1.5, 0);  % Nodo Izquierdo
+    \coordinate (R) at (4.5, 0);  % Nodo Derecho
+
+
+    \draw (0, 1.5) to[vsourcesin, l=$V_{gen}$] (0, -1.5);
+    \draw (0, 1.5) -- (T);   
+    \draw (0, -1.5) -- (B); 
+
+   
+    \draw (L) to[D*] (T); 
+    \draw (L) to[D*] (B); 
+    \draw (T) to[D*] (R); 
+    \draw (B) to[D*] (R); 
+
+   
+    \draw (L) -- ++(-0.3, 0) node[ground] {};
+
+   
+    \draw (R) -- (5.5, 0) 
+        to[C, l_=$100\,\mu\text{F}$, *-] (5.5, -2.5) 
+        node[ground] {};
+
+    
+    \draw (5.5, 0) -- (7.0, 0)
+        to[R, name=res, *-] (7.0, -2.5) 
+        node[ground] {};
+
+    \node[anchor=west] at (6.1, -0.75) {$R_L$};
+    \node[anchor=east] at (6.8, -1.25) {$4.7\,\text{k}\Omega$};
+   
+
+    \node[anchor=west] at (7.4, -0.5) {$+$};
+    \node[anchor=west] at (7.4, -1.25) {$V_{out}$};
+    \node[anchor=west] at (7.4, -2.0) {$-$};
+
+\end{circuitikz}
+
+\end{document}

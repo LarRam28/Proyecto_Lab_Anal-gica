@@ -1,0 +1,58 @@
+\documentclass[class=article,border=10pt, margin=3mm]{standalone}
+\usepackage{verbatim}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usepackage[americanresistors,americaninductors,RPvoltages]{circuitikz}
+\usepackage{amsmath}
+
+
+\begin{document}
+
+\begin{circuitikz}[american, scale=1.2]
+    
+    % 1. Definimos las coordenadas para controlar la altura (Rhombus height)
+    % Si quieres el rombo más alto, aumenta el 2.0 y disminuye el -2.0
+    \coordinate (T) at (3, 1.5);  % Top
+    \coordinate (B) at (3, -1.5); % Bottom
+    \coordinate (L) at (1.5, 0);  % Left
+    \coordinate (R) at (4.5, 0);  % Right
+
+    % --- Fuente de CA ---
+    \draw (0, 1.5) to[vsourcesin, l=$V_{gen}$] (0, -1.5);
+    \draw (0, 1.5) -- (T);   
+    \draw (0, -1.5) -- (B); 
+
+    % --- Diodos ---
+    \draw (L) to[D*] (T); 
+    \draw (L) to[D*] (B); 
+    \draw (T) to[D*] (R); 
+    \draw (B) to[D*] (R); 
+
+    % 2. Nodo de tierra separado a la izquierda
+    % Dibujamos una línea pequeña a la izquierda (-- ++(-0.5,0)) y luego la tierra
+    \draw (L) -- ++(-0.2, 0) node[ground] {};
+
+    % --- Resistencia de Carga RL ---
+    \draw (R) -- (6, 0)
+        to[R, name=res] (6, -2.5) 
+        node[ground] {};
+
+    % 3. Posicionamiento manual de etiquetas (para que no se choquen)
+    % Usamos los "anchors" de la resistencia (res.west, res.east)
+    
+    % RL a la derecha de la resistencia
+    \node[anchor=west] at (5.0, -0.8) {$R_L$};
+    
+    % Valor a la izquierda de la resistencia
+    \node[anchor=east] at (5.8, -1.25) {$4.7\,\text{k}\Omega$};
+   
+    
+    % Vout con signos + y - bien alineados
+    \node[anchor=west] at (6.2, -0.5) {$+$};
+    \node[anchor=west] at (6.2, -1.25) {$V_{out}$};
+    \node[anchor=west] at (6.2, -2.0) {$-$};
+
+\end{circuitikz}
+
+\end{document}

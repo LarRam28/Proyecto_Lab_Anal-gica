@@ -1,0 +1,32 @@
+\documentclass[class=article,border=10pt]{standalone}
+\usepackage{verbatim}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usepackage[americanresistors,americaninductors,RPvoltages]{circuitikz}
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{circuitikz} [american, scale=1]
+    \draw  
+    (0,0) to [sV, l=$V_{gen}$] (0,3)
+    (0,3) to [D*, l_=1N4001] (3,3)
+    % Capacitor en paralelo
+    (3,3) to [C, l=$100\,\mu\text{F}$] (3,0)
+    % Línea superior hacia la resistencia
+    (3,3) -- (5,3)
+    % Resistencia de carga
+    (5,3) to [R, l=$4.7\,k\Omega$] (5,0)    
+    % Línea inferior de retorno (GND)
+    (0,0) to [short,-] (5,0)    
+    ;
+    
+    % Etiquetas de medición del osciloscopio
+    \draw[<-,>=stealth,blue] (0,3.1) -- (0,4) [thick] node[above] {$X$};
+    \draw[<-,>=stealth,blue] (5,3.1) -- (5,4) [thick] node[right] {$Y$};
+    \draw[<-,>=stealth,blue] (5.1,0) -- (6.1,0) [thick] node[above] {$GND_{osc}$};    
+
+\end{circuitikz}
+
+\end{document}
