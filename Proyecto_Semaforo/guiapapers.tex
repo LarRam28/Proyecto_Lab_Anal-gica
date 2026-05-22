@@ -54,8 +54,26 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Resultados}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Montajes empleados}
+
+El subsistema de audio se divide en tres etapas funcionales, tal como se aprecia en la Figura~\ref{Montaje_audio}:
+
+\begin{enumerate}
+    \item Etapa de control lógico: recibe las señales \textit{Pv}, \textit{5s} y \textit{0s} provenientes de la FSM, encargadas de habilitar el oscilador. Además, incorpora compuertas NOR configuradas como un \textit{SR Latch}, utilizado para seleccionar la frecuencia de operación.
+
+    \item Etapa de oscilación: implementada mediante un temporizador 555 en modo astable, acompañado de una red RC seleccionable a través del transistor Q2 (2N3904), permitiendo ajustar la frecuencia de salida.
+    
+    \item Etapa de salida: la señal cuadrada generada en la salida \textit{OUT} del temporizador 555 se dirige hacia la salida \textit{Out Audio}, para su posterior amplificación mediante un circuito transistorizado externo encargado de excitar el parlante.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=3in]{Montaje_audio}
+\caption{Diagrama del bloque de audio}
+\label{Montaje_audio}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,7 +82,148 @@
 
 \subsection{Datos experimentales y simulados}
 
+\subsection{Bloque de audio}
 
+Las compuertas NOR del integrado 7402 procesan las señales digitales de
+control: \texttt{5s} (señal que se activa
+en los últimos 5\,s del conteo peatonal) y \texttt{0s} (señal de fin de
+ciclo). La combinación lógica implementada junto con la señal proporcionada por la FSM de \texttt{Pv} (señal activa cuando el semáforo peatonal esta en verde) garantiza que:
+ 
+\begin{itemize}
+  \item El oscilador queda habilitado únicamente cuando el paso peatonal
+        está activo (\texttt{Pv} en estado correspondiente).
+  \item La señal de base de Q2 se activa en los últimos 5\,s (señal
+        \texttt{5s} activa), modificando la resistencia efectiva del
+        temporizador y aumentando la frecuencia del tono.
+\end{itemize}
+ 
+\subsubsection{Transistor (Q2 — 2N3904)}
+Las compuertas NOR se configuran como un SR Latch, cuya función es
+almacenar el estado lógico asociado a la señal de 5 segundos. Esto permite
+mantener la salida en nivel alto aun después de finalizar el pulso que lo activa,
+conservando dicho estado durante el tiempo requerido por el sistema.
+La salida del SR Latch se conecta a la base del transistor Q2,
+permitiendo controlar su estado de conducción. De esta manera, se garantiza
+que Q2 permanezca activado durante los 5 segundos establecidos, manteniendo
+la configuración correspondiente del circuito oscilador.
+
+El transistor Q2 opera en la región de corte/saturación como interruptor
+electrónico. La resistencia de base $R_2=220\,\Omega$ limita la corriente
+de base para garantizar la saturación. Cuando Q2 conduce, habilita un
+segundo capacitor en paralelo con $C_1$ ($0{,}22\,\mu F$), obteniéndose una
+capacitancia equivalente de $0{,}44\,\mu F$. El incremento en la capacitancia
+aumenta el tiempo de carga y descarga del temporizador 555, reduciendo la
+frecuencia de oscilación y produciendo el tono de menor frecuencia.
+
+Cuando Q2 permanece en corte, únicamente participa el capacitor
+$C_1$ ($0{,}22\,\mu F$), dando lugar a una frecuencia de oscilación mayor,
+correspondiente al tono rapido.
+ 
+\subsubsection{Temporizador 555 en Modo Astable}
+ 
+El temporizador NE555 se encuentra configurado en modo astable, generando una
+onda cuadrada continua cuya frecuencia depende de la red RC externa.
+Para determinar el período de oscilación se emplea la siguiente ecuación:
+
+\begin{align}
+T &= 0.693(R_A + 2R_B)C
+\label{eq:periodo}
+\end{align}
+
+A continuación, se analiza el comportamiento del circuito para las dos
+configuraciones posibles del capacitor:
+
+\begin{enumerate}
+
+\item Caso 1: se encuentran conectados ambos capacitores,
+obteniéndose una capacitancia equivalente de
+$0{,}44\,\mu F$
+
+\begin{align*}
+T &= 0.693\left(100\,k\Omega + 2(850\,k\Omega)\right)
+(0{,}44\,\mu F)\\
+T &\approx 0{,}549\,s\\
+T &\approx 549\,ms
+\end{align*}
+
+\item Caso 2: únicamente se encuentra conectado el capacitor
+$C_2 = 0{,}22\,\mu F$
+
+\begin{align*}
+T &= 0.693\left(100\,k\Omega + 2(850\,k\Omega)\right)
+(0{,}22\,\mu F)\\
+T &\approx 0{,}274\,s\\
+T &\approx 274\,ms
+\end{align*}
+
+\end{enumerate}
+
+Resultado de la simulación se tiene aproximadamente los mismos valores, 
+la señal de salida del 555 se observa en laFigura~\ref{Señal_audio}. Como se puede 
+observar, hay un aumento en la frecuencia en los últimos 5s.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=3in]{Señal_audio}
+\caption{Salida del bloque de audio}
+\label{Señal_audio}
+\end{figure}
+
+La frecuencia de oscilación para cada caso se obtiene a partir de la relación entre frecuencia y período:
+
+\begin{align}
+f &= \frac{1}{T}
+\label{eq:frecuencia}
+\end{align}
+
+Aplicando la ecuación anterior para cada configuración:
+
+\begin{enumerate}
+
+\item Caso 1: capacitancia equivalente de $0{,}44\,\mu F$
+
+\begin{align*}
+f &= \frac{1}{549\,ms}\\
+f &= \frac{1}{0{,}549\,s}\\
+f &\approx 1{,}82\,Hz
+\end{align*}
+
+\item Caso 2: capacitancia de $0{,}22\,\mu F$
+
+\begin{align*}
+f &= \frac{1}{274\,ms}\\
+f &= \frac{1}{0{,}274\,s}\\
+f &\approx 3{,}65\,Hz
+\end{align*}
+
+\end{enumerate}
+
+Estas frecuencias producen los tonos de bip adecuads para la señalización durante el paso peatonal normal.
+Este ajuste queda sujeto a cambios posteriores al prototipo físico.
+
+\subsubsection{Salida del bloque}
+
+La salida del subsistema de audio corresponde a una señal de onda cuadrada
+generada por el temporizador NE555. Mediante las configuraciones descritas
+anteriormente, es posible modificar la frecuencia de oscilación de dicha
+señal, permitiendo la generación de distintos tonos de audio según el estado
+del sistema.
+
+La señal de salida se conecta a la base de un transistor encargado
+de funcionar como etapa de amplificación y adaptación de potencia, tal como
+se muestra en la Figura~\ref{Parlante}. De esta manera, el transistor actúa
+como una interfaz entre la señal de control proveniente del NE555 y la carga
+de salida.
+
+Debido a las variaciones posibles en la implementación física, algunos parámetros pueden 
+requerir ajustes posteriores durante la etapa de ensamblaje y pruebas experimentales.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.5in]{Parlante}
+\caption{Conexión del parlante}
+\label{Parlante}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \FloatBarrier
