@@ -1,1 +1,1 @@
-# Proyecto_Lab_Anal-gica
+# Proyecto_Lab_Analógica
