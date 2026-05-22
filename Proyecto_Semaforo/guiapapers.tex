@@ -90,7 +90,128 @@ La señal \texttt{Reset\_00} se obtiene a partir de la detección del estado 00 
 
 Las salidas \texttt{U\_A}--\texttt{U\_D} y \texttt{D\_A}--\texttt{D\_D} entregan los cuatro bits BCD correspondientes a unidades y decenas, respectivamente.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Lógica de Control del Semáforo}
+\subsection{Lógica de Control del Semáforo FSM}
+
+El subsistema de la FSM central recibe como entradas 7 bits provenientes del contador BCD, los cuales son necesarios para la detección de tiempos. Los primeros 4 bits corresponden al dígito de las unidades, mientras que los últimos 3 bits representan el dígito de las decenas. Únicamente se requieren 3 bits para las decenas debido a que el conteo regresivo inicia en 50, por lo que el valor máximo en las decenas es 5, el cual puede representarse con 3 bits en BCD.
+
+Además, el subsistema recibe la señal de reloj (\textit{clk}), necesaria para la actualización de los flip-flops tipo D que conforman la máquina de estados finitos (FSM).
+
+La FSM requiere la detección de tres instantes de tiempo específicos: 35 segundos, al cual se le asigna la variable F; 30 segundos, asociado a la variable G; y 0 segundos, correspondiente a la variable H.
+
+La primera parte del subsistema realiza la detección de estos tiempos mediante compuertas NOT y una compuerta AND, identificando las combinaciones de bits correspondientes para cada instante requerido, tal como se muestra en la Figura \ref{35}. Finalmente, la FSM sigue la lógica de funcionamiento presentada en la Figura \ref{FMS}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=3in]{35}
+\caption{Detección de 35}
+\label{35}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=3in]{FSM}
+\caption{Diagrama de estados}
+\label{FMS}
+\end{figure}
+
+Del diagrama de estados de la figura \ref{FMS} se extrae la tabla \ref{tabla_estados} con las condiciones para el siguiente estado
+
+\begin{table}[H]
+    \centering
+    \caption{Tabla de estados del sistema}
+    \begin{tabular}{
+    |>{\centering\arraybackslash}m{1cm}
+    |>{\centering\arraybackslash}m{1cm}
+    |>{\centering\arraybackslash}m{1.5cm}
+    |>{\centering\arraybackslash}m{1cm}
+    |>{\centering\arraybackslash}m{1cm}|}    
+    \hline
+    \multicolumn{2}{|c|}{Estado actual} & Tiempo & \multicolumn{2}{c|}{Estado siguiente} \\ 
+    \hline    
+    $A$ & $B$ &  & $A'$ & $B'$ \\ 
+    \hline    
+    0 & 0 & $\overline{F}$ & 0 & 0 \\ 
+    \hline    
+    0 & 0 & $F$ & 0 & 1 \\ 
+    \hline    
+    0 & 1 & $\overline{G}$ & 0 & 1 \\ 
+    \hline    
+    0 & 1 & $G$ & 1 & 0 \\ 
+    \hline    
+    1 & 0 & $\overline{H}$ & 1 & 0 \\ 
+    \hline    
+    1 & 0 & $H$ & 0 & 0 \\ 
+    \hline    
+    \end{tabular}
+    \label{tabla_estados}
+\end{table}
+
+De la tabla \ref{tabla_estados} se extraen las ecuaciones para el siguiente estado:
+
+\[
+A' = \overline{A}BG + A\overline{B}\,\overline{H}
+\]
+
+\[
+B' = \overline{A}\,\overline{B}\,F + \overline{A}B\overline{G}
+\]
+
+Con estas ecuaciones se hicieron las conexiones de los flip-flops tal y como se puedsta en la figura \ref{ff}. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=3in]{ff}
+\caption{conexión de flip-flops}
+\label{ff}
+\end{figure}
+
+Además, de acuerdo con los requerimientos establecidos para la lógica de control de las señales luminosas de los semáforos, se propone la Tabla \ref{tabla_salidas}. En ella, las variables Vv, Va y Vr corresponden a las luces verde, amarilla y roja del semáforo vehicular, respectivamente mientras que las variables Pv y Pr representan las luces verde y roja del semáforo peatonal.
+
+\begin{table}[H]
+    \centering
+    \caption{Salidas por estado}
+    \begin{tabular}{
+    |>{\centering\arraybackslash}m{2cm}
+    |>{\centering\arraybackslash}m{3cm}
+    |>{\centering\arraybackslash}m{2cm}|}    
+    \hline
+    Estado & Vv Va Vr & Pv Pr \\ 
+    \hline   
+    00 & 1  0  0 & 0  1 \\ 
+    \hline    
+    01 & 0  1  0 & 0  1 \\ 
+    \hline  
+    10 & 0  0  1 & 1  0 \\ 
+    \hline  
+    \end{tabular}
+    \label{tabla_salidas}
+\end{table}
+De la tabla \ref{tabla_salidas} se extraen las ecuaciones para cada señal de control de las luces:
+\[
+V_v = \overline{A}\,\overline{B}
+\]
+\[
+V_a = \overline{A}B
+\]
+\[
+V_r = A\overline{B}
+\]
+\[
+P_v = A\overline{B}
+\]
+\[
+P_r = \overline{A}\,\overline{B} + \overline{A}B
+\]
+Con base en estas ecuaciones y tras realizar las simplificaciones correspondientes, se implementaron las conexiones de las señales de control para cada una de las luces de este subsistema, tal como se muestra en la Figura \ref{salidas}.
+
+Adicionalmente, se incorporaron dos salidas extra: una destinada a la detección del instante de 5 segundos y otra correspondiente a la detección de 0 segundos.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=3in]{salidas}
+\caption{conexiones de las salidas}
+\label{salidas}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Visualización}
