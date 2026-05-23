@@ -122,6 +122,31 @@ Adicionalmente, el circuito incluye capacitores de desacople para garantizar la 
 
 En la simulación, el 555 llega a ser muy pesado para multisim, por lo que para pruebas se usaba generadores de pulsos y así comprobar que los demás sistemas funcionaran correctamente
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Interfaz de Botones Peatonales y Activación}
+
+Para que el sistema responda a las solicitudes de cruce de los peatones, se diseñó una etapa de entrada encargada de acondicionar y memorizar las activaciones de los botones físicos. El esquema de este bloque se presenta en la Figura~\ref{Botones_Peatonales}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=5in]{Boton_peatonal}
+\caption{Circuito de acondicionamiento de botones y memoria de solicitud peatonal}
+\label{Botones_Peatonales}
+\end{figure}
+
+El circuito cuenta con dos entradas, \texttt{Boton1} y \texttt{Boton2}, que representan los pulsadores ubicados en ambos extremos del cruce peatonal. Estas señales ingresan a compuertas inversoras con histéresis (Schmitt Trigger) del integrado 74HC14. El uso de tecnología Schmitt Trigger en esta etapa permite limpiar el ruido eléctrico y eliminar los rebotes mecánicos característicos de los interruptores físicos, entregando una señal digital limpia y estable.
+
+Las salidas de los primeros inversores se conectan a una compuerta OR del integrado 74HC32. Esta configuración lógica asegura que la señal resultante, denominada \texttt{Boton\_Act}, pase a un nivel alto lógico si cualquiera de los dos botones es presionado. 
+
+Dado que la solicitud del peatón suele ser un pulso momentáneo, es necesario que el sistema "memorice" la petición hasta que sea seguro iniciar la secuencia del semáforo. Para esto se emplea un flip-flop tipo D del integrado 74HC74. La señal \texttt{Boton\_Act} pasa por un tercer inversor 74HC14 para generar un pulso en bajo (LOW) que se inyecta directamente al pin de \textit{Preset} asíncrono (\texttt{\~1PR}) del flip-flop. 
+
+Al activarse el \textit{Preset}, la salida \texttt{1Q} del flip-flop se pone inmediatamente en estado alto sin importar el estado del reloj (el cual, en esta configuración, se encuentra aterrizado junto con la entrada \texttt{1D}). Esta salida pasa a través de un resistor de limitación $R_1$ de $330\,\Omega$ y se convierte en la señal \texttt{FFD} (también referida como \texttt{FFD\_En} en la etapa de conteo). 
+
+La señal \texttt{FFD} es la que le indica al resto del sistema, en particular al contador decreciente y a la máquina de estados, que hay una solicitud pendiente y habilita el inicio del conteo para detener el tráfico vehicular. El flip-flop retendrá esta memoria hasta que el ciclo peatonal haya finalizado por completo, momento en el cual el sistema de control enviará un pulso bajo a la entrada \texttt{Reset} (\texttt{\~1CLR}), borrando la memoria y dejando el circuito listo para una nueva solicitud peatonal.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Contador Decreciente}
 
@@ -154,7 +179,7 @@ Además, el subsistema recibe la señal de reloj (\textit{clk}), necesaria para 
 
 La FSM requiere la detección de tres instantes de tiempo específicos: 35 segundos, al cual se le asigna la variable F; 30 segundos, asociado a la variable G; y 0 segundos, correspondiente a la variable H.
 
-La primera parte del subsistema realiza la detección de estos tiempos mediante compuertas NOT y una compuerta AND, identificando las combinaciones de bits correspondientes para cada instante requerido, tal como se muestra en la Figura \ref{35}. Finalmente, la FSM sigue la lógica de funcionamiento presentada en la Figura \ref{FMS}.
+La primera parte del subsistema realiza la detección de estos tiempos mediante compuertas NOT y una compuerta AND, identificando las combinaciones de bits correspondientes para cada instante requerido, tal como se muestra en la Figura \ref{35}. Finalmente, la FSM sigue la lógica de funcionamiento presentada en la Figura \ref{FMS}
 
 \begin{figure}[H]
 \centering
@@ -459,31 +484,39 @@ requerir ajustes posteriores durante la etapa de ensamblaje y pruebas experiment
 \label{Parlante}
 \end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\FloatBarrier
-\section{Conclusiones}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \FloatBarrier
-\section{Referencias}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\FloatBarrier
+\begin{thebibliography}{9}
+
+\bibitem{ti_lmc555}
+Texas Instruments, \emph{LMC555 CMOS Timer}, Rev. O, SNAS558M, 2016. [En línea]. Disponible en: \url{https://www.ti.com/lit/ds/symlink/lmc555.pdf}
+
+\bibitem{ti_lm78xx}
+Texas Instruments, \emph{LM340, LM78xx Series 3-Terminal Positive Regulators}, Rev. M, SNOSBT0M, 2016. [En línea]. Disponible en: \url{https://www.ti.com/lit/ds/symlink/lm7805c.pdf}
+
+\bibitem{ti_cd4511b}
+Texas Instruments, \emph{CD4511B CMOS BCD-to-7-Segment Latch Decoder Drivers}, SCHS072B, 2003. [En línea]. Disponible en: \url{https://www.ti.com/lit/ds/symlink/cd4511b.pdf}
+
+\bibitem{ti_74ls192}
+Texas Instruments, \emph{SN74LS192, SN74LS193 Synchronous 4-Bit Up/Down Counters}, SDLS043, 1988. [En línea]. Disponible en: \url{https://www.ti.com/lit/ds/symlink/sn74ls192.pdf}
+
+\bibitem{nexperia_74hc14}
+Nexperia, \emph{74HC14; 74HCT14 Hex inverting Schmitt trigger}, Rev. 8, 2021. [En línea]. Disponible en: \url{https://assets.nexperia.com/documents/data-sheet/74HC_HCT14.pdf}
+
+\bibitem{nexperia_74hc74}
+Nexperia, \emph{74HC74; 74HCT74 Dual D-type flip-flop with set and reset; positive edge-trigger}, Rev. 8, 2021. [En línea]. Disponible en: \url{https://assets.nexperia.com/documents/data-sheet/74HC_HCT74.pdf}
+
+\bibitem{mano2012digital}
+M. M. Mano y M. D. Ciletti, \emph{Digital Design: With an Introduction to the Verilog HDL}, 5ta ed. Pearson, 2012.
+
+\end{thebibliography}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \FloatBarrier
-\begin{IEEEbiography}[{\includegraphics[width=1.05in,height=1.6in,clip,keepaspectratio]{fig/villalobos}}]{J. D. Villalobos Monge}
 
-Nacido en Cartago, Costa Rica, el 9 de julio de 2004, realizó sus estudios de educación primaria y secundaria en el Colegio Anglo American. Posteriormente inició sus estudios universitarios en la carrera de Ciencias Actuariales en la Universidad de Costa Rica (UCR), donde cursó dos años. Actualmente se encuentra estudiando la carrera de Ingeniería Electrónica en el Instituto Tecnológico de Costa Rica (TEC), cursando su tercer año.
-
-Cuenta con cuatro años de experiencia laboral en temporadas como asistente de administración en una Asociación Solidarista del Colegio Anglo American. Sus principales áreas de interés incluyen la robótica, los sistemas electrónicos y el desarrollo de vehículos eléctricos.
-
-\end{IEEEbiography}
-
-\begin{IEEEbiography}[{\includegraphics[width=1.05in,height=1.6in,clip,keepaspectratio]{ramirez}}]{L. J. Ramírez Benavides}
-
-Nacido en Heredia, Costa Rica, el 28 de noviembre de 2004, obtuvo el título de Técnico en Electrónica Industrial en el Colegio Técnico Profesional de Zarcero en el año 2023. Actualmente cursa el tercer año de la carrera de Ingeniería Electrónica en el Instituto Tecnológico de Costa Rica (TEC).
-
-Ha adquirido experiencia en el sector comercial a través de un negocio familiar y trabajó en Electrónica Zarcero antes de iniciar sus estudios universitarios. Sus principales áreas de interés incluyen los sistemas embebidos, el Internet de las Cosas (IoT) y la computación cuántica.
-
-\end{IEEEbiography}
 
 \vfill
 
