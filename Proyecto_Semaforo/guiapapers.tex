@@ -5,7 +5,7 @@
 % by Michael Shell
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[journal]{IEEEtran}
+\documentclass[journal, onecolumn]{IEEEtran}
 
 \usepackage{instructivo}
 \graphicspath{{./}{./fig/}}
@@ -61,19 +61,75 @@ El sistema fue desarrollado y verificado mediante simulación electrónica, lo c
 \section{Resultados}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Transformador de 120 V}
+\subsection{Convertidor AC/DC}
+
+El bloque de alimentación es el encargado de proveer los niveles de tensión de corriente directa (DC) necesarios para el funcionamiento de los componentes lógicos y analógicos del sistema. Para ello, se diseñó una fuente de alimentación lineal a partir de la red eléctrica de $120\,V$ de corriente alterna (AC), cuyo esquema se muestra en la Figura~\ref{Fuente_Alimentacion}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=6in]{Convertidor_ACDC}
+\caption{Circuito de la fuente de alimentación con salidas fijas de 12\,V y 5\,V}
+\label{Fuente_Alimentacion}
+\end{figure}
+
+En la primera etapa, el transformador reductor (T1) disminuye la tensión de entrada de $120\,V$ a aproximadamente $15\,V$ AC. Seguidamente, esta señal alterna ingresa a un puente rectificador de onda completa conformado por cuatro diodos 1N4001G (D1 a D4), el cual se encarga de convertir la señal bidireccional alterna en una señal pulsante de una sola polaridad.
+
+Para atenuar el rizado de la señal rectificada, se emplean capacitores de filtrado a la entrada ($C_2$ de $220\,\mu F$ y $C_3$ de $0{,}33\,\mu F$), obteniéndose un nivel de voltaje en corriente directa (DC) continuo pero no regulado. Esta señal alimenta en paralelo a dos reguladores de voltaje lineales: un LM7812 y un LM7805. El LM7812 proporciona una salida fija de $12\,V$, mientras que el LM7805 entrega una salida fija de $5\,V$. Se escogieron estos componentes para poder utilizar tegnología TTL y CMOS en el circuito.
+A la salida de cada regulador se colocan capacitores adicionales ($C_1$ de $1\,\mu F$ y $C_4$ de $0{,}1\,\mu F$) con el objetivo de mejorar la respuesta transitoria y filtrar ruidos de alta frecuencia.
+
+La familia 78xx son dispositivos que mantienen un voltaje constante en su terminal de salida comportándose internamente como resistencias variables que absorben la diferencia de potencial. Esto implica que la energía eléctrica sobrante (la diferencia entre los $\approx 15\,V$ de entrada y los 12\,V o 5\,V de salida) es disipada obligatoriamente en forma de calor. 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Reloj 555}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Para que el sistema de semáforo funcione de manera correcta, se necesita una base de tiempo exacta de un segundo. Esta señal de reloj (\textit{clk}) es la encargada de dictar el ritmo del sistema, activando los contadores decrecientes para que la cuenta regresiva mostrada en los displays de siete segmentos disminuya de forma precisa segundo a segundo. 
+
+Para lograr esto, se implementó un circuito generador de pulsos utilizando un temporizador LMC555CN configurado en modo astable, cuyo diagrama se presenta en la Figura~\ref{Reloj_555}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=5in]{CLK}
+\caption{Temporizador 555 configurado en modo astable para generar la señal de reloj de 1\,Hz}
+\label{Reloj_555}
+\end{figure}
+
+En la configuración astable, el circuito opera como un oscilador de carrera libre, generando un tren de pulsos cuadrados continuos en el pin de salida (\textit{OUT}). La frecuencia de esta señal de salida depende exclusivamente de la red de temporización externa RC conectada a los pines de descarga (\textit{DIS}), umbral (\textit{THR}) y disparo (\textit{TRI}). Esta red está conformada por los resistores $R_A = 8\,k\Omega$, $R_B = 68\,k\Omega$ y el capacitor de temporización $C_2 = 10\,\mu F$.
+
+La frecuencia de oscilación para un 555 en modo astable está regida por la siguiente ecuación:
+
+\[
+f = \frac{1{,}44}{(R_A + 2R_B)C_2}
+\]
+
+Al sustituir los valores de los componentes seleccionados en el diseño, se comprueba matemáticamente el funcionamiento del bloque:
+
+\[
+f = \frac{1{,}44}{(8\,k\Omega + 2(68\,k\Omega))(10\,\mu F)}
+\]
+
+\[
+f = \frac{1{,}44}{(8000\,\Omega + 136000\,\Omega)(10 \times 10^{-6}\,F)}
+\]
+
+\[
+f = \frac{1{,}44}{(144000\,\Omega)(10 \times 10^{-6}\,F)} = \frac{1{,}44}{1{,}44\,s} = 1\,Hz
+\]
+
+Como resultado, se obtiene una frecuencia de exactamente $1\,Hz$, lo cual corresponde a un período de $T = 1\,s$. Este tren de pulsos es el que alimenta la entrada de reloj (\textit{DOWN}) del contador de unidades, garantizando la correcta transición de los estados de la máquina y la visualización de los tiempos vehiculares y peatonales.
+
+Adicionalmente, el circuito incluye capacitores de desacople para garantizar la estabilidad frente a ruidos eléctricos. El capacitor $C_3$ de $10\,nF$ conectado al pin de control de voltaje (\textit{CON}) evita fluctuaciones en el voltaje de referencia interno del integrado, mientras que el capacitor $C_1$ de $0{,}1\,\mu F$ estabiliza la tensión de alimentación directa desde la fuente de $5\,V$.
+
+En la simulación, el 555 llega a ser muy pesado para multisim, por lo que para pruebas se usaba generadores de pulsos y así comprobar que los demás sistemas funcionaran correctamente
+
+
 \subsection{Contador Decreciente}
 
 El bloque de conteo se implementó mediante dos contadores BCD 74LS192 configurados en modo decreciente, tal como se muestra en la Figura~\ref{Contador_50}. El contador superior corresponde a las unidades, mientras que el contador inferior corresponde a las decenas, permitiendo representar el conteo desde 50 hasta 00.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=3in]{Contador_50}
+\includegraphics[width=5in]{Contador_50}
 \caption{Bloque del contador decreciente de 50 a 00}
 \label{Contador_50}
 \end{figure}
@@ -220,7 +276,7 @@ El sistema de visualización se implementó mediante dos decodificadores BCD a s
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=3in]{Decodificador_50}
+\includegraphics[width=5in]{Decodificador_50}
 \caption{Bloque decodificador para visualización}
 \label{Decodificador_50}
 \end{figure}
@@ -256,7 +312,7 @@ El subsistema de audio se divide en tres etapas funcionales, tal como se aprecia
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=3in]{Montaje_audio}
+\includegraphics[width=5in]{Montaje_audio}
 \caption{Diagrama del bloque de audio}
 \label{Montaje_audio}
 \end{figure}
@@ -342,7 +398,7 @@ observar, hay un aumento en la frecuencia en los últimos 5s.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=3in]{Señal_audio}
+\includegraphics[width=5in]{Señal_audio}
 \caption{Salida del bloque de audio}
 \label{Senal_audio}
 \end{figure}
