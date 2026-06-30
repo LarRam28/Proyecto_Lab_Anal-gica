@@ -60,8 +60,10 @@ El sistema fue desarrollado y verificado mediante simulación electrónica, lo c
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Resultados}
 
+\subsection{Simulación}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Convertidor AC/DC}
+\subsubsection{Convertidor AC/DC}
 
 El bloque de alimentación es el encargado de proveer los niveles de tensión de corriente directa (DC) necesarios para el funcionamiento de los componentes lógicos y analógicos del sistema. Para ello, se diseñó una fuente de alimentación lineal a partir de la red eléctrica de $120\,V$ de corriente alterna (AC), cuyo esquema se muestra en la Figura~\ref{Fuente_Alimentacion}.
 
@@ -79,9 +81,8 @@ A la salida de cada regulador se colocan capacitores adicionales ($C_1$ de $1\,\
 
 La familia 78xx son dispositivos que mantienen un voltaje constante en su terminal de salida comportándose internamente como resistencias variables que absorben la diferencia de potencial. Esto implica que la energía eléctrica sobrante (la diferencia entre los $\approx 15\,V$ de entrada y los 12\,V o 5\,V de salida) es disipada obligatoriamente en forma de calor. 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Reloj 555}
+\subsubsection{Reloj 555}
 
 Para que el sistema de semáforo funcione de manera correcta, se necesita una base de tiempo exacta de un segundo. Esta señal de reloj (\textit{clk}) es la encargada de dictar el ritmo del sistema, activando los contadores decrecientes para que la cuenta regresiva mostrada en los displays de siete segmentos disminuya de forma precisa segundo a segundo. 
 
@@ -122,10 +123,8 @@ Adicionalmente, el circuito incluye capacitores de desacople para garantizar la 
 
 En la simulación, el 555 llega a ser muy pesado para multisim, por lo que para pruebas se usaba generadores de pulsos y así comprobar que los demás sistemas funcionaran correctamente
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Interfaz de Botones Peatonales y Activación}
+\subsubsection{Interfaz de Botones Peatonales y Activación}
 
 Para que el sistema responda a las solicitudes de cruce de los peatones, se diseñó una etapa de entrada encargada de acondicionar y memorizar las activaciones de los botones físicos. El esquema de este bloque se presenta en la Figura~\ref{Botones_Peatonales}.
 
@@ -147,8 +146,7 @@ Al activarse el \textit{Preset}, la salida \texttt{1Q} del flip-flop se pone inm
 La señal \texttt{FFD} es la que le indica al resto del sistema, en particular al contador decreciente y a la máquina de estados, que hay una solicitud pendiente y habilita el inicio del conteo para detener el tráfico vehicular. El flip-flop retendrá esta memoria hasta que el ciclo peatonal haya finalizado por completo, momento en el cual el sistema de control enviará un pulso bajo a la entrada \texttt{Reset} (\texttt{\~1CLR}), borrando la memoria y dejando el circuito listo para una nueva solicitud peatonal.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\subsection{Contador Decreciente}
+\subsubsection{Contador Decreciente}
 
 El bloque de conteo se implementó mediante dos contadores BCD 74LS192 configurados en modo decreciente, tal como se muestra en la Figura~\ref{Contador_50}. El contador superior corresponde a las unidades, mientras que el contador inferior corresponde a las decenas, permitiendo representar el conteo desde 50 hasta 00.
 
@@ -170,8 +168,9 @@ La segunda compuerta AND recibe la señal \texttt{FFD\_En}, proveniente del flip
 La señal \texttt{Reset\_00} se obtiene a partir de la detección del estado 00 y de la activación de los botones. Mientras el conteo sea diferente de 00, esta señal permite que el sistema continúe operando. Al llegar a 00, se bloquea el reloj y el contador permanece detenido hasta que una nueva activación permita iniciar otro ciclo.
 
 Las salidas \texttt{U\_A}--\texttt{U\_D} y \texttt{D\_A}--\texttt{D\_D} entregan los cuatro bits BCD correspondientes a unidades y decenas, respectivamente.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Lógica de Control del Semáforo FSM}
+\subsubsection{Lógica de Control del Semáforo FSM}
 
 El subsistema de la FSM central recibe como entradas 7 bits provenientes del contador BCD, los cuales son necesarios para la detección de tiempos. Los primeros 4 bits corresponden al dígito de las unidades, mientras que los últimos 3 bits representan el dígito de las decenas. Únicamente se requieren 3 bits para las decenas debido a que el conteo regresivo inicia en 50, por lo que el valor máximo en las decenas es 5, el cual puede representarse con 3 bits en BCD.
 
@@ -295,7 +294,7 @@ Adicionalmente, se incorporaron dos salidas extra: una destinada a la detección
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Visualización}
+\subsubsection{Visualización}
 
 El sistema de visualización se implementó mediante dos decodificadores BCD a siete segmentos CD4511, encargados de convertir las salidas binarias provenientes del contador en las señales necesarias para controlar los displays de siete segmentos, tal como se muestra en la Figura~\ref{Decodificador_50}. Estos integrados fueron seleccionados debido a que permiten simplificar la conexión entre las salidas BCD del contador y los segmentos del display, evitando implementar una lógica combinacional adicional para cada segmento.
 
@@ -322,8 +321,9 @@ Las salidas de los decodificadores se conectan finalmente a los displays de siet
 \caption{Visualización del conteo mediante displays de siete segmentos}
 \label{Deco_Seg}
 \end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Audio}
+\subsubsection{Audio}
 
 El subsistema de audio se divide en tres etapas funcionales, tal como se aprecia en la Figura~\ref{Montaje_audio}:
 
@@ -355,7 +355,7 @@ ciclo). La combinación lógica implementada junto con la señal proporcionada p
         temporizador y aumentando la frecuencia del tono.
 \end{itemize}
  
-\subsubsection{Transistor (Q2 — 2N3904)}
+\paragraph{Transistor (Q2 — 2N3904)}
 
 Las compuertas NOR se configuran como un SR Latch, cuya función es
 almacenar el estado lógico asociado a la señal de 5 segundos. Esto permite
@@ -378,7 +378,7 @@ Cuando Q2 permanece en corte, únicamente participa el capacitor
 $C_1$ ($0{,}22\,\mu F$), dando lugar a una frecuencia de oscilación mayor,
 correspondiente al tono rapido.
  
-\subsubsection{Temporizador 555 en Modo Astable}
+\paragraph{Temporizador 555 en Modo Astable}
  
 El temporizador NE555 se encuentra configurado en modo astable, generando una
 onda cuadrada continua cuya frecuencia depende de la red RC externa.
@@ -460,7 +460,7 @@ f &\approx 3{,}65\,Hz
 Estas frecuencias producen los tonos de bip adecuads para la señalización durante el paso peatonal normal.
 Este ajuste queda sujeto a cambios posteriores al prototipo físico.
 
-\subsubsection{Salida del bloque}
+\paragraph{Salida del bloque}
 
 La salida del subsistema de audio corresponde a una señal de onda cuadrada
 generada por el temporizador NE555. Mediante las configuraciones descritas
@@ -484,8 +484,72 @@ requerir ajustes posteriores durante la etapa de ensamblaje y pruebas experiment
 \label{Parlante}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Protoboard}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+En esta etapa se implementó el circuito completo en protoboard, tomando como base las simulaciones realizadas previamente. Durante el montaje se realizaron algunos ajustes respecto al diseño inicial, principalmente para mejorar la estabilidad de las conexiones. Una de las principales dificultades fue el uso de cables tipo jumper, ya que generaban falsos contactos durante las pruebas. Por esta razón, se sustituyeron por cable calibre 22, lo cual permitió obtener conexiones más firmes y confiables durante la verificación del funcionamiento del sistema.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.62\textwidth]{Proto_completa.jpeg}
+\caption{Montaje completo del circuito en protoboard}
+\label{Proto_completa}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{PCB}
+
+Para el diseño de la PCB se utilizó el programa EAGLE. En una primera versión se diseñó la placa del convertidor CA/DC con un tamaño aproximado de $13\,cm \times 8\,cm$, sin embargo, esta propuesta no fue aceptada debido a sus dimensiones. Posteriormente, se realizó un segundo diseño más compacto, logrando reducir el circuito a una placa de aproximadamente $30\,mm \times 80\,mm$, la cual correspondió al diseño final implementado.
+
+\subsubsection{PCB sin soldar}
+
+Con el apoyo de los asistentes del curso, se llevó el segundo diseño a la placa física. En esta etapa inicial, las pistas y perforaciones se observaron correctamente, sin presentar inconvenientes importantes antes del proceso de soldadura.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\textwidth]{PCB_sinsoldar.jpeg}
+\caption{PCB del convertidor CA/DC antes del montaje de componentes}
+\label{PCB_sinsoldar}
+\end{figure}
+
+\subsubsection{PCB con componentes}
+
+Para el montaje de la placa se utilizaron dos bornes de conexión de dos pines, un puente de diodos KPB310, un transformador de $110\,V$ a $6\,V$, tres capacitores de $1000\,\mu F$, un regulador de voltaje 7805 y una resistencia de $1\,k\Omega$ de $5\,W$. Estos componentes conforman la etapa de conversión y regulación de voltaje utilizada para alimentar el sistema.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\textwidth]{PCB_Componentes.jpeg}
+\caption{PCB con los componentes principales montados}
+\label{PCB_Componentes}
+\end{figure}
+
+\subsubsection{PCB soldada}
+
+Durante el proceso de soldadura se utilizó pasta para soldar, una base de apoyo y un multímetro para verificar continuidad en las conexiones. No se presentaron inconvenientes importantes durante esta etapa; sin embargo, se tuvo especial cuidado al soldar para evitar dañar internamente los componentes debido al calor del cautín.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\textwidth]{PCB_Soldado.jpeg}
+\caption{PCB soldada y verificada mediante pruebas de continuidad}
+\label{PCB_Soldado}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Maqueta}
+
+Para la construcción de la maqueta se utilizó una caja de cartón como base, con el fin de soportar adecuadamente el peso de la estructura. Las aceras se elaboraron con estereofón y fueron pintadas de color gris para simular el concreto. La calle se construyó mediante papel opalina impreso y adherido a la base. Además, se incorporaron arbustos plásticos y material tipo esponja para mejorar la presentación y evitar el movimiento de los elementos decorativos.
+
+En la parte eléctrica de la maqueta se presentaron varias dificultades. Inicialmente se utilizó cable UTP para llevar las conexiones desde el circuito hacia los elementos de la maqueta, pero se emplearon dos tipos de cable: sólido y multifilar. El cable multifilar generó múltiples fallos de conexión, provocando que algunos elementos funcionaran de manera intermitente. Por esta razón, fue necesario desoldar los cables del display y sustituirlos por cable UTP sólido, con el cual se obtuvo un funcionamiento más estable y confiable.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.62\textwidth]{Maqueta.jpeg}
+\caption{Maqueta final del semáforo vehicular y peatonal}
+\label{Maqueta}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \FloatBarrier
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \FloatBarrier
