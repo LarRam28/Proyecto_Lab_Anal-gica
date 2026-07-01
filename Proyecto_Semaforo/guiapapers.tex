@@ -146,18 +146,18 @@ Al activarse el \textit{Preset}, la salida \texttt{1Q} del flip-flop se pone inm
 La señal \texttt{FFD} es la que le indica al resto del sistema, en particular al contador decreciente y a la máquina de estados, que hay una solicitud pendiente y habilita el inicio del conteo para detener el tráfico vehicular. El flip-flop retendrá esta memoria hasta que el ciclo peatonal haya finalizado por completo, momento en el cual el sistema de control enviará un pulso bajo a la entrada \texttt{Reset} (\texttt{\~1CLR}), borrando la memoria y dejando el circuito listo para una nueva solicitud peatonal.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Contador Decreciente}
+\subsection{Contador Decreciente}
 
 El bloque de conteo se implementó mediante dos contadores BCD 74LS192 configurados en modo decreciente, tal como se muestra en la Figura~\ref{Contador_50}. El contador superior corresponde a las unidades, mientras que el contador inferior corresponde a las decenas, permitiendo representar el conteo desde 50 hasta 00.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=4.7in]{Contador_50}
+\includegraphics[width=5in]{Contador_50}
 \caption{Bloque del contador decreciente de 50 a 00}
 \label{Contador_50}
 \end{figure}
 
-La carga inicial se realiza mediante la entrada \textit{LOAD}, utilizando un circuito RC junto con inversores 7404. Este arreglo permite cargar automáticamente el valor inicial al energizar el circuito y, posteriormente, liberar los contadores para iniciar el conteo.
+La carga inicial se realiza mediante la entrada \textit{LOAD}, la cual está conectada a los botones pulsadores. Cuando los botones no se encuentran presionados, entregan un nivel lógico \textbf{0}; al presionarlos, entregan un nivel lógico \textbf{1}. La entrada \textit{LOAD} es activa en bajo (está negada). De esta manera, mientras el botón no está presionado, la entrada recibe un \textbf{1} lógico, permitiendo que el contador funcione en modo de conteo normal. Cuando el botón se preciona, la entrada pasa a un \textbf{0} lógico, activando la señal \textit{LOAD} y cargando el valor inicial en el contador. Una vez que se libera el botón, la entrada vuelve a un \textbf{1} lógico y el contador continúa el conteo a partir del valor cargado.
 
 La señal de reloj se conecta a la entrada \textit{DOWN} del contador de unidades, por lo que cada pulso disminuye su valor. Cuando este contador completa su ciclo, su salida \textit{BO} se utiliza para activar el conteo decreciente del contador de decenas. De esta forma, las decenas solo cambian cuando las unidades pasan por todo su ciclo, permitiendo obtener una secuencia decimal correcta.
 
