@@ -69,7 +69,7 @@ El bloque de alimentación es el encargado de proveer los niveles de tensión de
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=6in]{Convertidor_ACDC}
+\includegraphics[width=5in]{Convertidor_ACDC}
 \caption{Circuito de la fuente de alimentación con salidas fijas de 12\,V y 5\,V}
 \label{Fuente_Alimentacion}
 \end{figure}
@@ -90,7 +90,7 @@ Para lograr esto, se implementó un circuito generador de pulsos utilizando un t
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=5in]{CLK}
+\includegraphics[width=3.8in]{CLK}
 \caption{Temporizador 555 configurado en modo astable para generar la señal de reloj de 1\,Hz}
 \label{Reloj_555}
 \end{figure}
@@ -152,7 +152,7 @@ El bloque de conteo se implementó mediante dos contadores BCD 74LS192 configura
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=5in]{Contador_50}
+\includegraphics[width=4.7in]{Contador_50}
 \caption{Bloque del contador decreciente de 50 a 00}
 \label{Contador_50}
 \end{figure}
@@ -182,14 +182,14 @@ La primera parte del subsistema realiza la detección de estos tiempos mediante 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=3in]{35}
+\includegraphics[width=2.5in]{35}
 \caption{Detección de 35}
 \label{35}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=3in]{FSM}
+\includegraphics[width=2.6in]{FSM}
 \caption{Diagrama de estados}
 \label{FMS}
 \end{figure}
@@ -288,7 +288,7 @@ Adicionalmente, se incorporaron dos salidas extra: una destinada a la detección
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=3in]{salidas}
+\includegraphics[width=2.6in]{salidas}
 \caption{conexiones de las salidas}
 \label{salidas}
 \end{figure}
@@ -328,16 +328,16 @@ Las salidas de los decodificadores se conectan finalmente a los displays de siet
 El subsistema de audio se divide en tres etapas funcionales, tal como se aprecia en la Figura~\ref{Montaje_audio}:
 
 \begin{enumerate}
-    \item Etapa de control lógico: recibe las señales \textit{Pv}, \textit{5s} y \textit{0s} provenientes de la FSM, encargadas de habilitar el oscilador. Además, incorpora compuertas NOR configuradas como un \textit{SR Latch}, utilizado para seleccionar la frecuencia de operación.
+    \item Etapa de control lógico: recibe las señales \textit{Pv}, \textit{5s} y \textit{0s} provenientes de la FSM, encargadas de habilitar el oscilador. Además, incorpora compuertas NOR configuradas como un SR Latch, utilizado para seleccionar la frecuencia de operación.
 
-    \item Etapa de oscilación: implementada mediante un temporizador 555 en modo astable, acompañado de una red RC seleccionable a través del transistor Q2 (2N3904), permitiendo ajustar la frecuencia de salida.
+    \item Etapa de oscilación: implementada mediante dos temporizadores 555 configurados en modo astable. El primer temporizador actúa como generador de la señal de control,que con una red RC seleccionable a través del transistor Q(2N3904) cambia la frecuencia según la señal de la FSM, posteriormente la salida del primer temporizador alimenta el segundo temporizador, el cual genera una señal de alta frecuencia, cuya frecuencia de oscilación es constante, esta se conecta a la otra etapa del sistema.
     
-    \item Etapa de salida: la señal cuadrada generada en la salida \textit{OUT} del temporizador 555 se dirige hacia la salida \textit{Out Audio}, para su posterior amplificación mediante un circuito transistorizado externo encargado de excitar el parlante.
+    \item Etapa de salida: la señal cuadrada generada en la salida \textit{OUT} del temporizador 555 se dirige hacia la salida \textit{Out Audio}, para su posterior amplificación mediante un circuito transistorizado externo encargado de amplificar la potencia, ya que se hizo uso de un circuito Amplificador de potencia clase A.
 \end{enumerate}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=5in]{Montaje_audio}
+\includegraphics[width=5in]{Audio}
 \caption{Diagrama del bloque de audio}
 \label{Montaje_audio}
 \end{figure}
@@ -355,11 +355,12 @@ ciclo). La combinación lógica implementada junto con la señal proporcionada p
         temporizador y aumentando la frecuencia del tono.
 \end{itemize}
  
+ 
 \paragraph{Transistor (Q2 — 2N3904)}
 
 Las compuertas NOR se configuran como un SR Latch, cuya función es
 almacenar el estado lógico asociado a la señal de 5 segundos. Esto permite
-mantener la salida en nivel alto aun después de finalizar el pulso que lo activa,
+mantener la salida en nivel alto aún después de finalizar el pulso que lo activa,
 conservando dicho estado durante el tiempo requerido por el sistema.
 La salida del SR Latch se conecta a la base del transistor Q2,
 permitiendo controlar su estado de conducción. De esta manera, se garantiza
@@ -369,18 +370,18 @@ la configuración correspondiente del circuito oscilador.
 El transistor Q2 opera en la región de corte/saturación como interruptor
 electrónico. La resistencia de base $R_2=220\,\Omega$ limita la corriente
 de base para garantizar la saturación. Cuando Q2 conduce, habilita un
-segundo capacitor en paralelo con $C_1$ ($0{,}22\,\mu F$), obteniéndose una
-capacitancia equivalente de $0{,}44\,\mu F$. El incremento en la capacitancia
+segundo capacitor en paralelo con $C_2$ de ($1\,\mu F$), obteniéndose una
+capacitancia equivalente de $3{,}2\,\mu F$. El incremento en la capacitancia
 aumenta el tiempo de carga y descarga del temporizador 555, reduciendo la
 frecuencia de oscilación y produciendo el tono de menor frecuencia.
 
 Cuando Q2 permanece en corte, únicamente participa el capacitor
-$C_1$ ($0{,}22\,\mu F$), dando lugar a una frecuencia de oscilación mayor,
+$C_2$ ($2{,}2\,\mu F$), dando lugar a una frecuencia de oscilación mayor,
 correspondiente al tono rapido.
  
 \paragraph{Temporizador 555 en Modo Astable}
  
-El temporizador NE555 se encuentra configurado en modo astable, generando una
+El primer temporizador NE555 se encuentra configurado en modo astable, generando una
 onda cuadrada continua cuya frecuencia depende de la red RC externa.
 Para determinar el período de oscilación se emplea la siguiente ecuación:
 
@@ -396,37 +397,26 @@ configuraciones posibles del capacitor:
 
 \item Caso 1: se encuentran conectados ambos capacitores,
 obteniéndose una capacitancia equivalente de
-$0{,}44\,\mu F$
+$3{,}2\,\mu F$
 
 \begin{align*}
-T &= 0.693\left(100\,k\Omega + 2(850\,k\Omega)\right)
-(0{,}44\,\mu F)\\
-T &\approx 0{,}549\,s\\
-T &\approx 549\,ms
+T &= 0.693\left(68\,k\Omega + 2(160\,k\Omega)\right)
+(3{,}2\,\mu F)\\
+T &\approx 0{,}860\,s\\
+T &\approx 860\,ms
 \end{align*}
 
 \item Caso 2: únicamente se encuentra conectado el capacitor
-$C_2 = 0{,}22\,\mu F$
+$C_2 = 2{,}2\,\mu F$
 
 \begin{align*}
-T &= 0.693\left(100\,k\Omega + 2(850\,k\Omega)\right)
-(0{,}22\,\mu F)\\
-T &\approx 0{,}274\,s\\
-T &\approx 274\,ms
+T &= 0.693\left(68\,k\Omega + 2(160\,k\Omega)\right)
+(2{,}2\,\mu F)\\
+T &\approx 0{,}591\,s\\
+T &\approx 591\,ms
 \end{align*}
 
 \end{enumerate}
-
-Resultado de la simulación se tiene aproximadamente los mismos valores, 
-la señal de salida del 555 se observa en la Figura~\ref{Senal_audio}. Como se puede 
-observar, hay un aumento en la frecuencia en los últimos 5s.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=5in]{Señal_audio}
-\caption{Salida del bloque de audio}
-\label{Senal_audio}
-\end{figure}
 
 La frecuencia de oscilación para cada caso se obtiene a partir de la relación entre frecuencia y período:
 
@@ -439,47 +429,77 @@ Aplicando la ecuación anterior para cada configuración:
 
 \begin{enumerate}
 
-\item Caso 1: capacitancia equivalente de $0{,}44\,\mu F$
+\item Caso 1: capacitancia equivalente de $3{,}2\,\mu F$
 
 \begin{align*}
-f &= \frac{1}{549\,ms}\\
-f &= \frac{1}{0{,}549\,s}\\
-f &\approx 1{,}82\,Hz
+f &= \frac{1}{860\,ms}\\
+f &= \frac{1}{0{,}860\,s}\\
+f &\approx 1{,}16\,Hz
 \end{align*}
 
-\item Caso 2: capacitancia de $0{,}22\,\mu F$
+\item Caso 2: capacitancia de $2{,}2\,\mu F$
 
 \begin{align*}
-f &= \frac{1}{274\,ms}\\
-f &= \frac{1}{0{,}274\,s}\\
-f &\approx 3{,}65\,Hz
+f &= \frac{1}{591\,ms}\\
+f &= \frac{1}{0{,}591\,s}\\
+f &\approx 1{,}70\,Hz
 \end{align*}
 
 \end{enumerate}
 
-Estas frecuencias producen los tonos de bip adecuads para la señalización durante el paso peatonal normal.
-Este ajuste queda sujeto a cambios posteriores al prototipo físico.
+El segundo temporizador NE555 se encuentra configurado en modo astable, generando una
+onda cuadrada continua cuya frecuencia es constante.
+Para determinar el período de oscilación se emplea la ecuación anteriormente utilizada para el período.
+
+\begin{align*}
+T &= 0.693\left(\SI{2.2}{\kilo\ohm}
+    + 2\left(\SI{6}{\kilo\ohm}\right)\right)
+    \SI{33.0}{\nano\farad} \\
+  &\approx \SI{324.73}{\micro\second}
+\end{align*}
+
+Y para determinar la frecuencia, se utiliza la relación entre frecuencia y período.
+
+\begin{align*}
+f &= \frac{1}{\SI{324.73}{\micro\second}} \\
+f &\approx \SI{3.08}{\kilo\hertz}
+\end{align*}
+
+Estas frecuencias producen los tonos de bip adecuados para la señalización durante el ciclo del paso peatonal.
+
 
 \paragraph{Salida del bloque}
 
-La salida del subsistema de audio corresponde a una señal de onda cuadrada
-generada por el temporizador NE555. Mediante las configuraciones descritas
-anteriormente, es posible modificar la frecuencia de oscilación de dicha
-señal, permitiendo la generación de distintos tonos de audio según el estado
-del sistema.
+La salida del subsistema de audio corresponde a una señal de onda 
+cuadrada generada por el temporizador NE555. Mediante las configuraciones 
+descritas anteriormente, es posible modificar la frecuencia de oscilación 
+de dicha señal, permitiendo la generación de distintos tonos de audio 
+según el estado del sistema.
 
-La señal de salida se conecta a la base de un transistor encargado
-de funcionar como etapa de amplificación y adaptación de potencia, tal como
-se muestra en la Figura~\ref{Parlante}. De esta manera, el transistor actúa
-como una interfaz entre la señal de control proveniente del NE555 y la carga
-de salida.
+Tal como se muestra en la Figura~\ref{Parlante}, se utilizó un circuito 
+amplificador de potencia Clase A (seguidor de emisor). Además se implementó 
+un par Darlington compuesto por el transistor NPN $Q_1$ (2N3904) y el transistor 
+de potencia $U_1$ (2N3053), encargado de suministrar la corriente necesaria al parlante. 
+Antes de la etapa de amplificación, la red formada por $R_5$ y $R_6$ actúa como un divisor 
+de tensión que atenúa la amplitud de la señal proveniente del temporizador.
 
-Debido a las variaciones posibles en la implementación física, algunos parámetros pueden 
-requerir ajustes posteriores durante la etapa de ensamblaje y pruebas experimentales.
+La señal proveniente de los temporizadores se acopla a la base del arreglo mediante el capacitor $C_2$, 
+el cual elimina cualquier componente de corriente continua. Esto para evitar sobrecargar la salida de estos. 
+
+El transistor $U_1$, al operar como seguidor de emisor, no proporciona 
+ganancia de tensión, pero ofrece una elevada ganancia de corriente que 
+permite excitar el parlante de $8~\Omega$. Por su parte, la 
+resistencia $R_3$ establece el punto de operación en reposo y estabiliza 
+la corriente del transistor de salida. Finalmente, el capacitor 
+de paso $C_1$ bloquea la componente de CD de la etapa de potencia, asegurando 
+que únicamente la señal de audio oscilante llegue al parlante, lo que produce 
+el sonido deseado y protege el altavoz.
+
+
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=1.5in]{Parlante}
+\includegraphics[width=3.6in]{Amplificador}
 \caption{Conexión del parlante}
 \label{Parlante}
 \end{figure}
@@ -492,7 +512,7 @@ En esta etapa se implementó el circuito completo en protoboard, tomando como ba
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.62\textwidth]{Proto_completa.jpeg}
+\includegraphics[width=0.5\textwidth]{Proto_completa.jpeg}
 \caption{Montaje completo del circuito en protoboard}
 \label{Proto_completa}
 \end{figure}
@@ -508,7 +528,7 @@ Con el apoyo de los asistentes del curso, se llevó el segundo diseño a la plac
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.60\textwidth]{PCB_sinsoldar.jpeg}
+\includegraphics[width=0.55\textwidth]{PCB_sinsoldar.jpeg}
 \caption{PCB del convertidor CA/DC antes del montaje de componentes}
 \label{PCB_sinsoldar}
 \end{figure}
@@ -519,7 +539,7 @@ Para el montaje de la placa se utilizaron dos bornes de conexión de dos pines, 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.60\textwidth]{PCB_Componentes.jpeg}
+\includegraphics[width=0.55\textwidth]{PCB_Componentes.jpeg}
 \caption{PCB con los componentes principales montados}
 \label{PCB_Componentes}
 \end{figure}
@@ -530,7 +550,7 @@ Durante el proceso de soldadura se utilizó pasta para soldar, una base de apoyo
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.60\textwidth]{PCB_Soldado.jpeg}
+\includegraphics[width=0.55\textwidth]{PCB_Soldado.jpeg}
 \caption{PCB soldada y verificada mediante pruebas de continuidad}
 \label{PCB_Soldado}
 \end{figure}
