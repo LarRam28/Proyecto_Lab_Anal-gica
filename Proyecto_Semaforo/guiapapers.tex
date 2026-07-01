@@ -70,16 +70,16 @@ El bloque de alimentación es el encargado de proveer los niveles de tensión de
 \begin{figure}[H]
 \centering
 \includegraphics[width=5in]{Convertidor_ACDC}
-\caption{Circuito de la fuente de alimentación con salidas fijas de 12\,V y 5\,V}
+\caption{Circuito de la fuente de alimentación con salidas fijas de 5\,V}
 \label{Fuente_Alimentacion}
 \end{figure}
 
-En la primera etapa, el transformador reductor (T1) disminuye la tensión de entrada de $120\,V$ a aproximadamente $15\,V$ AC. Seguidamente, esta señal alterna ingresa a un puente rectificador de onda completa conformado por cuatro diodos 1N4001G (D1 a D4), el cual se encarga de convertir la señal bidireccional alterna en una señal pulsante de una sola polaridad.
+En la primera etapa, el transformador reductor (T1) disminuye la tensión de entrada de $120\,V$ a aproximadamente $6\,V$ AC. Seguidamente, esta señal alterna ingresa a un puente rectificador de onda completa conformado por el puente KPB310, el cual se encarga de convertir la señal bidireccional alterna en una señal pulsante de una sola polaridad.
 
-Para atenuar el rizado de la señal rectificada, se emplean capacitores de filtrado a la entrada ($C_2$ de $220\,\mu F$ y $C_3$ de $0{,}33\,\mu F$), obteniéndose un nivel de voltaje en corriente directa (DC) continuo pero no regulado. Esta señal alimenta en paralelo a dos reguladores de voltaje lineales: un LM7812 y un LM7805. El LM7812 proporciona una salida fija de $12\,V$, mientras que el LM7805 entrega una salida fija de $5\,V$. Se escogieron estos componentes para poder utilizar tegnología TTL y CMOS en el circuito.
-A la salida de cada regulador se colocan capacitores adicionales ($C_1$ de $1\,\mu F$ y $C_4$ de $0{,}1\,\mu F$) con el objetivo de mejorar la respuesta transitoria y filtrar ruidos de alta frecuencia.
+Para atenuar el rizado de la señal rectificada, se emplean capacitores de filtrado a la entrada ($C_3$ de $1000\,\mu F$ y $C_2$ de $1000\,\mu F$), obteniéndose un nivel de voltaje en corriente directa (DC) continuo. Esta señal alimenta a un regulador de voltaje lineal LM7805.
 
-La familia 78xx son dispositivos que mantienen un voltaje constante en su terminal de salida comportándose internamente como resistencias variables que absorben la diferencia de potencial. Esto implica que la energía eléctrica sobrante (la diferencia entre los $\approx 15\,V$ de entrada y los 12\,V o 5\,V de salida) es disipada obligatoriamente en forma de calor. 
+A la salida del regulador se coloca un capacitor adicional ($C_1$ de $1000\,\mu F$ con el objetivo de mejorar la respuesta transitoria y filtrar ruidos de alta frecuencia.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Reloj 555}
@@ -124,7 +124,7 @@ Adicionalmente, el circuito incluye capacitores de desacople para garantizar la 
 En la simulación, el 555 llega a ser muy pesado para multisim, por lo que para pruebas se usaba generadores de pulsos y así comprobar que los demás sistemas funcionaran correctamente
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Interfaz de Botones Peatonales y Activación}
+\subsubsection{Botones Peatonales y Activación}
 
 Para que el sistema responda a las solicitudes de cruce de los peatones, se diseñó una etapa de entrada encargada de acondicionar y memorizar las activaciones de los botones físicos. El esquema de este bloque se presenta en la Figura~\ref{Botones_Peatonales}.
 
@@ -137,11 +137,11 @@ Para que el sistema responda a las solicitudes de cruce de los peatones, se dise
 
 El circuito cuenta con dos entradas, \texttt{Boton1} y \texttt{Boton2}, que representan los pulsadores ubicados en ambos extremos del cruce peatonal. Estas señales ingresan a compuertas inversoras con histéresis (Schmitt Trigger) del integrado 74HC14. El uso de tecnología Schmitt Trigger en esta etapa permite limpiar el ruido eléctrico y eliminar los rebotes mecánicos característicos de los interruptores físicos, entregando una señal digital limpia y estable.
 
-Las salidas de los primeros inversores se conectan a una compuerta OR del integrado 74HC32. Esta configuración lógica asegura que la señal resultante, denominada \texttt{Boton\_Act}, pase a un nivel alto lógico si cualquiera de los dos botones es presionado. 
+Las salidas de los primeros inversores se conectan a una compuerta AND del integrado 74HC08. Esta configuración lógica asegura que la señal resultante, denominada \texttt{Boton\_Act}, pase a un nivel bajo lógico si cualquiera de los dos botones es presionado. 
 
-Dado que la solicitud del peatón suele ser un pulso momentáneo, es necesario que el sistema "memorice" la petición hasta que sea seguro iniciar la secuencia del semáforo. Para esto se emplea un flip-flop tipo D del integrado 74HC74. La señal \texttt{Boton\_Act} pasa por un tercer inversor 74HC14 para generar un pulso en bajo (LOW) que se inyecta directamente al pin de \textit{Preset} asíncrono (\texttt{\~1PR}) del flip-flop. 
+Dado que la solicitud del peatón suele ser un pulso momentáneo, es necesario que el sistema "memorice" la petición hasta que sea seguro iniciar la secuencia del semáforo. Para esto se emplea un flip-flop tipo D pero con una configuración set-reset del integrado 74HC74. La señal \texttt{Boton\_Act} pasa por un tercer inversor 74HC14 para generar un pulso en alto (cuando algún botón es presionado) que se inyecta directamente al pin de \textit{set} asíncrono (\texttt{\~1PR}) del flip-flop. 
 
-Al activarse el \textit{Preset}, la salida \texttt{1Q} del flip-flop se pone inmediatamente en estado alto sin importar el estado del reloj (el cual, en esta configuración, se encuentra aterrizado junto con la entrada \texttt{1D}). Esta salida pasa a través de un resistor de limitación $R_1$ de $330\,\Omega$ y se convierte en la señal \texttt{FFD} (también referida como \texttt{FFD\_En} en la etapa de conteo). 
+Al activarse el \textit{Preset}, la salida \texttt{1Q} del flip-flop se pone inmediatamente en estado alto sin importar el estado del reloj (el cual, en esta configuración, se encuentra aterrizado junto con la entrada \texttt{1D}). Esta salida se convierte en la señal \texttt{FFD} (también referida como \texttt{FFD\_En} en la etapa de conteo). 
 
 La señal \texttt{FFD} es la que le indica al resto del sistema, en particular al contador decreciente y a la máquina de estados, que hay una solicitud pendiente y habilita el inicio del conteo para detener el tráfico vehicular. El flip-flop retendrá esta memoria hasta que el ciclo peatonal haya finalizado por completo, momento en el cual el sistema de control enviará un pulso bajo a la entrada \texttt{Reset} (\texttt{\~1CLR}), borrando la memoria y dejando el circuito listo para una nueva solicitud peatonal.
 
